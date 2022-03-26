@@ -85,25 +85,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ],
               );},
             ),
-            ListTile(
-              leading: Icon(Icons.delete_outline_sharp),
-              title: CustomText(textData: 'Trash', textSize: 16),
-              contentPadding: EdgeInsets.zero,
-              onTap: (){
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> TrashPage()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.dark_mode_outlined),
-              title: CustomText(textData: 'Dark mode', textSize: 16),
-              trailing: Switch(
-                  value: switchValue, onChanged: (val) {
-               setState(() {
-                 switchValue = val;
-               });
-              }),
-              contentPadding: EdgeInsets.zero,
-            ),
+            // ListTile(
+            //   leading: Icon(Icons.delete_outline_sharp),
+            //   title: CustomText(textData: 'Trash', textSize: 16),
+            //   contentPadding: EdgeInsets.zero,
+            //   onTap: (){
+            //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> TrashPage()));
+            //   },
+            // ),
+            // ListTile(
+            //   leading: const Icon(Icons.dark_mode_outlined),
+            //   title: CustomText(textData: 'Dark mode', textSize: 16),
+            //   trailing: Switch(
+            //       value: switchValue, onChanged: (val) {
+            //    setState(() {
+            //      switchValue = val;
+            //    });
+            //   }),
+            //   contentPadding: EdgeInsets.zero,
+            // ),
           ]),
         ),
       ),

@@ -14,7 +14,7 @@ class Notes extends HiveObject{
   DateTime? time;
 
   @HiveField(3)
-  List<Tags>? tags;
+  List<String>? tags;
 
   Notes({this.title,required this.note,this.time,this.tags});
 }

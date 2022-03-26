@@ -1,7 +1,12 @@
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 ThemeData lightTheme = ThemeData(
+  textButtonTheme: TextButtonThemeData(
+    style: ButtonStyle(
+      textStyle: MaterialStateProperty.all(TextStyle(color: Colors.black))
+    )
+  ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
       foregroundColor: MaterialStateProperty.all(Colors.white),
@@ -40,3 +45,7 @@ ThemeData darkTheme = ThemeData(
 
 late double deviceWidth;
 late double deviceHeight;
+
+DateFormat dateFormat = DateFormat('dd MMM yyyy');
+DateFormat dateFormatTime = DateFormat('jm');
+DateFormat dateFormatter = DateFormat('yyyy-mm-dd h:mm a');
