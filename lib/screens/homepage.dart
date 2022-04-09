@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:intl/intl.dart';
 import 'package:notes_app/custom_widgets/custom_text.dart';
 import 'package:notes_app/main.dart';
 import 'package:notes_app/navigation_drawer.dart';
@@ -204,7 +201,7 @@ class _HomePageState extends State<HomePage> {
                         textWeight: FontWeight.bold,
                       )),
                 ),
-            CustomText(textData: list[index].note, textSize: 14),
+            list[index].note.isNotEmpty?CustomText(textData: list[index].note, textSize: 14):Container(),
             list[index].time!=null ? Padding(
               padding: const EdgeInsets.only(top: 5),
               child: DecoratedBox(

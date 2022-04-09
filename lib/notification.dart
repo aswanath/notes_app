@@ -1,25 +1,21 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 
 int createUniqueId() {
-  return DateTime.now().year +
-      DateTime.now().month +
-      DateTime.now().hour +
-      DateTime.now().minute +
-      DateTime.now().millisecond;
+   int id = int.parse(DateTime.now().millisecondsSinceEpoch.toString().substring(0,10));
+   return id;
 }
 
 Future<void> createReminderNotification(
-    DateTime notificationSchedule,{String? title,required String note}) async {
-  print("created");
+    {String? title,required String note,required int key,DateTime? notificationSchedule}) async {
   await AwesomeNotifications().createNotification(
       content:
-          NotificationContent(id: createUniqueId(), channelKey: 'reminder',
+          NotificationContent(id: key, channelKey: 'reminder',
           title: title??'',
             body: note,
             notificationLayout: NotificationLayout.Default
           ),
   actionButtons: [NotificationActionButton(key: 'MARK_DONE', label: 'Mark Done')],
-    schedule: NotificationCalendar(repeats: false,
+    schedule: notificationSchedule!=null ?NotificationCalendar(repeats: false,
     year: notificationSchedule.year,
         month: notificationSchedule.month,
         day: notificationSchedule.day,
@@ -27,6 +23,6 @@ Future<void> createReminderNotification(
       minute: notificationSchedule.minute,
       second: 0,
       millisecond: 0
-    )
+    ):null
   );
 }

@@ -1,18 +1,22 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_geofence/Geolocation.dart';
+import 'package:flutter_geofence/geofence.dart';
+import 'package:google_place/google_place.dart';
 import 'package:hive/hive.dart';
 import 'package:notes_app/custom_widgets/custom_text.dart';
 import 'package:notes_app/main.dart';
+import 'package:notes_app/screens/place_select.dart';
 import 'package:notes_app/theme.dart';
 
 import '../model/model.dart';
 import '../notification.dart';
 
+
 class AddNotes extends StatefulWidget {
   final int? keySelected;
-   AddNotes({Key? key, this.keySelected}) : super(key: key);
+
+  AddNotes({Key? key, this.keySelected}) : super(key: key);
 
   @override
   State<AddNotes> createState() => _AddNotesState();
@@ -25,31 +29,41 @@ class _AddNotesState extends State<AddNotes> {
   var boxTags = Hive.box<Tags>(tagsBox);
   List<CheckBoxChange> checkbox = [];
   late List<Tags> labelList;
-   DateTime? selectedDate;
-   TimeOfDay? selectedTime;
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
 
   @override
   void initState() {
     labelList = boxTags.values.toList();
-      boxTags.values.map((e) {
-        checkbox.add(CheckBoxChange(title: e.tagName));
-      }).toList();
-    if(widget.keySelected!=null){
+    boxTags.values.map((e) {
+      checkbox.add(CheckBoxChange(title: e.tagName));
+    }).toList();
+    if (widget.keySelected != null) {
       Notes element = boxNotes.get(widget.keySelected)!;
       titleController.text = element.title!;
       notesController.text = element.note;
-      selectedDate = element.time!=null?DateTime(element.time!.year,element.time!.month,element.time!.day):null;
-      selectedTime = element.time!=null?TimeOfDay(hour: element.time!.hour, minute: element.time!.minute,):null;
-      if(element.tags!.isNotEmpty){
-        element.tags!.map((elem){
-         checkbox.map((e) {
-           if(e.title==elem){
-             e.changed=true;
-           }
-         }).toList();
+      selectedDate = element.time != null
+          ? DateTime(element.time!.year, element.time!.month, element.time!.day)
+          : null;
+      selectedTime = element.time != null
+          ? TimeOfDay(
+        hour: element.time!.hour,
+        minute: element.time!.minute,
+      )
+          : null;
+      if (element.tags!.isNotEmpty) {
+        element.tags!.map((elem) {
+          checkbox.map((e) {
+            if (e.title == elem) {
+              e.changed = true;
+            }
+          }).toList();
         }).toList();
       }
     }
+    Geofence.requestPermissions();
+    // String apiKey = DotEnv().env['AIzaSyCl5ULIrxClwMyBKGI1szhCDAXqkbVwQNY']!;
+
     super.initState();
   }
 
@@ -57,43 +71,68 @@ class _AddNotesState extends State<AddNotes> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (notesController.text.isNotEmpty&&widget.keySelected==null) {
-          boxNotes.add(Notes(
-              note: notesController.text,
-              title: titleController.text,
-              time: (selectedDate!=null)?DateTime(
-                  selectedDate!.year,
-                  selectedDate!.month,
-                  selectedDate!.day,
-                  selectedTime!.hour,
-                  selectedTime!.minute,
-                  00):null,
-            tags: checkedList()
-          ));
-          if(selectedDate!=null){
-            createReminderNotification(DateTime(
-                selectedDate!.year,
-                selectedDate!.month,
-                selectedDate!.day,
-                selectedTime!.hour,
-                selectedTime!.minute,
-                00),title: titleController.text,note: notesController.text);
-          }
-        }else{
-          boxNotes.put(widget.keySelected,
+        if ((notesController.text.isNotEmpty ||
+            titleController.text.isNotEmpty) &&
+            widget.keySelected == null) {
+          int keyId = createUniqueId();
+          boxNotes.put(
+              keyId,
               Notes(
-                  note: notesController.text,
+                  note: notesController.text.trim(),
                   title: titleController.text,
-                  time: (selectedDate!=null)?DateTime(
+                  time: (selectedDate != null)
+                      ? DateTime(
                       selectedDate!.year,
                       selectedDate!.month,
                       selectedDate!.day,
                       selectedTime!.hour,
                       selectedTime!.minute,
-                      00):null,
-                  tags: checkedList()
-              )
-          );
+                      00)
+                      : null,
+                  tags: checkedList()));
+          if (selectedDate != null) {
+            createReminderNotification(
+                notificationSchedule: DateTime(
+                    selectedDate!.year,
+                    selectedDate!.month,
+                    selectedDate!.day,
+                    selectedTime!.hour,
+                    selectedTime!.minute,
+                    00),
+                title: titleController.text,
+                note: notesController.text,
+                key: keyId);
+          }
+        } else if (widget.keySelected != null) {
+          boxNotes.put(
+              widget.keySelected,
+              Notes(
+                  note: notesController.text,
+                  title: titleController.text,
+                  time: (selectedDate != null)
+                      ? DateTime(
+                      selectedDate!.year,
+                      selectedDate!.month,
+                      selectedDate!.day,
+                      selectedTime!.hour,
+                      selectedTime!.minute,
+                      00)
+                      : null,
+                  tags: checkedList()));
+          if (selectedDate != null) {
+            AwesomeNotifications().cancelSchedule(widget.keySelected!);
+            createReminderNotification(
+                notificationSchedule: DateTime(
+                    selectedDate!.year,
+                    selectedDate!.month,
+                    selectedDate!.day,
+                    selectedTime!.hour,
+                    selectedTime!.minute,
+                    00),
+                title: titleController.text,
+                note: notesController.text,
+                key: widget.keySelected!);
+          }
         }
         return true;
       },
@@ -110,14 +149,18 @@ class _AddNotesState extends State<AddNotes> {
             IconButton(
               onPressed: () {
                 showDatePicker(
-                        context: context,
-                        initialDate: selectedDate??DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(DateTime.now().year + 5))
+                    context: context,
+                    initialDate: selectedDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(DateTime
+                        .now()
+                        .year + 5))
                     .then((value) {
                   if (value != null) {
                     selectedDate = value;
-                    showTimePicker(context: context, initialTime: selectedTime??TimeOfDay.now())
+                    showTimePicker(
+                        context: context,
+                        initialTime: selectedTime ?? TimeOfDay.now())
                         .then((value) {
                       if (value != null) {
                         selectedTime = value;
@@ -129,7 +172,28 @@ class _AddNotesState extends State<AddNotes> {
               },
               icon: const Icon(Icons.notifications_active_outlined),
               splashRadius: 20,
-            )
+            ),
+            IconButton(
+                onPressed: () async {
+                  Location location = await Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (context) => const PlaceSelect()));
+
+                  Geolocation geoLocation = Geolocation(latitude: location.lat!,
+                      longitude: location.lng!,
+                      radius: 100,
+                      id: createUniqueId().toString());
+
+                  Geofence.addGeolocation(geoLocation, GeolocationEvent.entry)
+                      .then((value) {
+                    createReminderNotification(
+                        note: 'created location event', key: createUniqueId());
+                  }).then((value) => Geofence.startListening(GeolocationEvent.entry, (foo) {
+                    createReminderNotification(note: 'You have reached the location', key: createUniqueId());
+                    print("created reminder");
+                  }));
+                },
+                icon: const Icon(Icons.add_location_alt_outlined)),
           ],
         ),
         body: Padding(
@@ -163,31 +227,32 @@ class _AddNotesState extends State<AddNotes> {
                       border: InputBorder.none),
                 ),
               ),
-              (selectedDate!=null)
+              (selectedDate != null)
                   ? FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(8)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.alarm),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              CustomText(
-                                  textData:
-                                      '${dateFormat.format(selectedDate!)} ${selectedTime!.format(context)}',
-                                  textSize: 16),
-                            ],
-                          ),
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.alarm),
+                        SizedBox(
+                          width: 5,
                         ),
-                      ),
-                    )
+                        CustomText(
+                            textData:
+                            '${dateFormat.format(selectedDate!)} ${selectedTime!
+                                .format(context)}',
+                            textSize: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              )
                   : SizedBox(),
               SizedBox(
                 height: 10,
@@ -281,7 +346,6 @@ class _AddNotesState extends State<AddNotes> {
     }).toList();
     return list;
   }
-
 }
 
 class CheckBoxChange {

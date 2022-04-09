@@ -2,11 +2,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 ThemeData lightTheme = ThemeData(
-  textButtonTheme: TextButtonThemeData(
-    style: ButtonStyle(
-      textStyle: MaterialStateProperty.all(TextStyle(color: Colors.black))
-    )
-  ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
       foregroundColor: MaterialStateProperty.all(Colors.white),

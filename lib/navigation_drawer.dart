@@ -42,7 +42,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 _labelAddEdit('');
               },
               leading: Icon(Icons.add),
-              title: CustomText(textData: 'Create new label', textSize: 16),
+              title: CustomText(textData: 'Create new label', textSize: 16,),
               contentPadding: EdgeInsets.zero,
             ),
             ValueListenableBuilder(
@@ -139,7 +139,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               }
             }
             Navigator.pop(context);
-          }, child: CustomText(textData: 'Save', textSize: 16))
+          }, child: CustomText(textData: 'Save', textSize: 16,textColor: Colors.white,))
         ],
       ),),
     ));
