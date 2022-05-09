@@ -14,7 +14,7 @@ class _PlaceSelectState extends State<PlaceSelect> {
 
   @override
   void initState() {
-    googlePlace = GooglePlace('AIzaSyD_XgPpdmweuu2KiitIuEQMkf7paH0WBug');
+    googlePlace = GooglePlace('************************8');
     super.initState();
   }
 
