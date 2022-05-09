@@ -62,7 +62,6 @@ class _AddNotesState extends State<AddNotes> {
       }
     }
     Geofence.requestPermissions();
-    // String apiKey = DotEnv().env['AIzaSyCl5ULIrxClwMyBKGI1szhCDAXqkbVwQNY']!;
 
     super.initState();
   }
